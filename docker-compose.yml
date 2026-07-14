@@ -1,0 +1,9 @@
+services:
+  app:
+    build: .
+    container_name: avito-telegram-notifier
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
