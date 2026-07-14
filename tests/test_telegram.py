@@ -38,7 +38,7 @@ class FakeBot:
 
 @pytest.fixture()
 def config() -> Config:
-    return Config.model_validate({"TELEGRAM_BOT_TOKEN": "123:test", "TELEGRAM_ADMIN_IDS": "111, 222"})
+    return Config.model_validate({"TELEGRAM_BOT_TOKEN": "123:test", "TELEGRAM_ADMIN_IDS": "111, 222", "APP_ENCRYPTION_KEY": "wC704B5NND5bAoho95Lsqv_sAtVfJ_lLgfHzG4YQrHs=", "ADMIN_API_KEY": "admin-key"})
 
 
 @pytest.fixture()
@@ -66,7 +66,7 @@ def make_context(config: Config, sessionmaker, bot: FakeBot):
 
 
 def test_parse_telegram_admin_ids() -> None:
-    cfg = Config.model_validate({"TELEGRAM_BOT_TOKEN": "123:test", "TELEGRAM_ADMIN_IDS": "123, 456,789"})
+    cfg = Config.model_validate({"TELEGRAM_BOT_TOKEN": "123:test", "TELEGRAM_ADMIN_IDS": "123, 456,789", "APP_ENCRYPTION_KEY": "wC704B5NND5bAoho95Lsqv_sAtVfJ_lLgfHzG4YQrHs=", "ADMIN_API_KEY": "admin-key"})
     assert cfg.telegram_admin_ids == (123, 456, 789)
 
 

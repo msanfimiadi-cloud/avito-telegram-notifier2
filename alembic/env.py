@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from app.config.settings import get_config
 from app.database.base import Base
+from app.models.avito_account import AvitoAccount  # noqa: F401
 from app.models.telegram_chat import TelegramChat  # noqa: F401
 
 config = context.config
