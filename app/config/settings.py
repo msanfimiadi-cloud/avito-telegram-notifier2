@@ -2,7 +2,7 @@ from functools import lru_cache
 import os
 
 from dotenv import load_dotenv
-from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator
+from pydantic import BaseModel, ConfigDict, Field, SecretStr, ValidationError, field_validator
 
 
 class Config(BaseModel):
@@ -14,6 +14,8 @@ class Config(BaseModel):
     telegram_bot_token: str = Field(alias="TELEGRAM_BOT_TOKEN")
     telegram_admin_ids: tuple[int, ...] = Field(default=(), alias="TELEGRAM_ADMIN_IDS")
     database_url: str = Field(default="sqlite+aiosqlite:///./data/app.db", alias="DATABASE_URL")
+    app_encryption_key: SecretStr = Field(alias="APP_ENCRYPTION_KEY", repr=False)
+    admin_api_key: SecretStr = Field(alias="ADMIN_API_KEY", repr=False)
 
     @field_validator("telegram_admin_ids", mode="before")
     @classmethod
@@ -34,11 +36,12 @@ class Config(BaseModel):
             return tuple(int(item) for item in value)
         raise ValueError("TELEGRAM_ADMIN_IDS must be a comma-separated list")
 
-    @field_validator("telegram_bot_token")
+    @field_validator("telegram_bot_token", "app_encryption_key", "admin_api_key")
     @classmethod
-    def validate_telegram_bot_token(cls, value: str) -> str:
-        if not value.strip():
-            raise ValueError("TELEGRAM_BOT_TOKEN must not be empty")
+    def validate_required_secret(cls, value: str | SecretStr) -> str | SecretStr:
+        raw_value = value.get_secret_value() if isinstance(value, SecretStr) else value
+        if not raw_value.strip():
+            raise ValueError("required secret setting must not be empty")
         return value
 
     @field_validator("app_env")

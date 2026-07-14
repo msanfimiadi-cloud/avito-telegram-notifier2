@@ -7,6 +7,7 @@ from fastapi import FastAPI
 from app.config.settings import get_config
 from app.database.session import dispose_engine
 from app.logging.setup import configure_logging
+from app.routers.admin_avito_accounts import router as admin_avito_accounts_router
 from app.routers.health import router as health_router
 from app.telegram.application import TelegramBotRunner
 
@@ -39,6 +40,7 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
     )
     application.include_router(health_router)
+    application.include_router(admin_avito_accounts_router)
     return application
 
 
