@@ -1,5 +1,4 @@
 from functools import lru_cache
-from pathlib import Path
 import os
 
 from dotenv import load_dotenv
@@ -13,10 +12,34 @@ class Config(BaseModel):
     app_port: int = Field(default=8000, alias="APP_PORT")
     log_level: str = Field(default="INFO", alias="LOG_LEVEL")
     telegram_bot_token: str = Field(alias="TELEGRAM_BOT_TOKEN")
-    avito_accounts_config_path: Path = Field(
-        default=Path("config/avito_accounts.yml"),
-        alias="AVITO_ACCOUNTS_CONFIG_PATH",
-    )
+    telegram_admin_ids: tuple[int, ...] = Field(default=(), alias="TELEGRAM_ADMIN_IDS")
+    database_url: str = Field(default="sqlite+aiosqlite:///./data/app.db", alias="DATABASE_URL")
+
+    @field_validator("telegram_admin_ids", mode="before")
+    @classmethod
+    def parse_telegram_admin_ids(cls, value: object) -> tuple[int, ...]:
+        if value in (None, ""):
+            return ()
+        if isinstance(value, str):
+            ids: list[int] = []
+            for item in value.split(","):
+                stripped = item.strip()
+                if not stripped:
+                    continue
+                if not stripped.isdigit():
+                    raise ValueError("TELEGRAM_ADMIN_IDS must contain comma-separated integer user IDs")
+                ids.append(int(stripped))
+            return tuple(ids)
+        if isinstance(value, (list, tuple, set)):
+            return tuple(int(item) for item in value)
+        raise ValueError("TELEGRAM_ADMIN_IDS must be a comma-separated list")
+
+    @field_validator("telegram_bot_token")
+    @classmethod
+    def validate_telegram_bot_token(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("TELEGRAM_BOT_TOKEN must not be empty")
+        return value
 
     @field_validator("app_env")
     @classmethod
